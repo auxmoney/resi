@@ -1,0 +1,42 @@
+{# resi module
+    [imageArray] array of "imageUrl" and "start width to show" combinations
+        - the images should be sorted descending (high to low widths)
+        - the last combination with the smallest image should not contain a width
+
+    example:
+    {{ mod.resi([
+        ['image_large.webp', '800px'],
+        ['image_large.jpg', '800px'],
+        ['image_small.jpg']
+    ])}}
+#}
+{% macro resi(imageArray) %}
+    {% set uniqueID = "uid" ~ random() ~ random() %}
+    {% set fallbackImageUrl = imageArray[imageArray|length - 1][0] %}
+
+    <div class="modPicture modPicture-stage">
+        <noscript>
+            <img src="{{ fallbackImageUrl }}"
+        </noscript>
+
+        {# blank 1x1 base64 encoded gif #}
+        <img id="{{ uniqueID }}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+
+        <script>
+            // Generate an array with all image & breakpoint pairs
+            var imageArray = [];
+            {% for imagePair in imageArray %}
+                {% set imageUrl = imagePair[0] %}
+                imageArray.push("{{ imageUrl }}");
+                {% if imagePair|length > 1 %}
+                    {% set breakpoint = imagePair[1] %}
+                    imageArray.push("{{ breakpoint }}");
+                {% else %}
+                    imageArray.push(0);
+                {% endif %}
+            {% endfor %}
+
+            responsiveImageJS(imageArray, "{{ uniqueID }}");
+        </script>
+    </div>
+{% endmacro %}
